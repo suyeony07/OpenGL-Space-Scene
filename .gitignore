@@ -1,0 +1,11 @@
+.vscode/
+build/
+.vs/
+out/
+Debug/
+Release/
+x64/
+*.exe
+*.obj
+*.ilk
+*.pdb
