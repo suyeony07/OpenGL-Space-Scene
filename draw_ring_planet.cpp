@@ -135,4 +135,28 @@ void drawRingPlanet() {
         }
         drawLineStrip(frontIn);
     }
+
+    // (7) 바깥 고리 마커 4개 (90도 간격)
+    {
+        float d = 0.012f;
+        for (int i = 0; i < 4; i++) {
+            float angle = rot + (float)M_PI * 0.5f * i;
+            float mx = cx + ringOutRx * cosf(angle);
+            float my = cy + ringOutRy * sinf(angle);
+            drawLineStrip({ mx - d, my, 0.0f, mx + d, my, 0.0f });
+            drawLineStrip({ mx, my - d, 0.0f, mx, my + d, 0.0f });
+        }
+    }
+
+    // (8) 안쪽 고리 마커 3개 (120도 간격, 반대 방향)
+    {
+        float d = 0.010f;
+        for (int i = 0; i < 3; i++) {
+            float angle = -rot + (float)M_PI * 2.0f / 3.0f * i;
+            float mx = cx + ringInRx * cosf(angle);
+            float my = cy + ringInRy * sinf(angle);
+            drawLineStrip({ mx - d, my, 0.0f, mx + d, my, 0.0f });
+            drawLineStrip({ mx, my - d, 0.0f, mx, my + d, 0.0f });
+        }
+    }
 }
