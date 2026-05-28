@@ -6,7 +6,7 @@
 
 // 로켓 (담당 브랜치: feature/rocket)
 // 좌표 범위: x[-0.25 ~ 0.25], y[-0.40 ~ 0.70]
-void drawRocket();
+void drawRocket(float offsetX, float offsetY, float scale);
 
 // 고리 달린 행성 (담당 브랜치: feature/ring-planet)
 // 좌표 범위: x[-0.95 ~ -0.45], y[0.35 ~ 0.90]
@@ -20,6 +20,10 @@ void drawUFO();
 // 좌표 범위: x[-0.90 ~ 0.90], y[-0.85 ~ 0.30]
 void drawConstellationAndComet();
 
-void drawStars();
-
+void drawStars(); //배경 별
+void drawObstacles(float time); //소행성
+void drawMoon(float x, float y); //달
+void drawHeart(float x, float y, float size, bool filled);
+void drawGameUI(int lives, int gameState);
+void drawUFO(float offsetX, float offsetY);
 #endif // __DRAW_OBJECTS_H__

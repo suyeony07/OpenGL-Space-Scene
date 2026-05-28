@@ -76,15 +76,15 @@ static void drawLine(float x1, float y1, float x2, float y2) {
     draw({ x1,y1,0, x2,y2,0 }, GL_LINES);
 }
 
-void drawUFO() {
+void drawUFO(float offsetX, float offsetY) {
     initShader();
     glUseProgram(s_prog);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     const float PI = 3.14159265f;
-    const float cx = 0.70f;
-    const float cy = 0.58f;
+    const float cx = offsetX;
+    const float cy = offsetY;
 
     // ── 빔 (청백색 그라데이션) ─────────────────────────
     float bT = cy - 0.07f;

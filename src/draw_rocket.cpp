@@ -158,125 +158,58 @@ static void drawEllipse(GLuint prog,
 //    5. 오른쪽 날개   — 삼각형
 //    6. 불꽃          — 채워진 삼각형 3개
 // ============================================================
-void drawRocket() {
+void drawRocket(float offsetX, float offsetY, float scale) {
 
-    // 로켓 전용 셰이더로 교체 (다른 팀원 셰이더에 영향 없음)
     GLint prevProgram = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
 
     GLuint rocketProg = getRocketProgram();
     glUseProgram(rocketProg);
 
-    // ----------------------------------------------------------
-    // 6. 불꽃 — 몸통보다 먼저 그려야 뒤로 가려짐
-    // ----------------------------------------------------------
+    auto sx = [&](float x) { return x * scale + offsetX; };
+    auto sy = [&](float y) { return y * scale + offsetY; };
 
-    // 6-1. 중앙 불꽃 (밝은 노랑)
+    // 6-1. 중앙 불꽃
     setColor(rocketProg, 1.0f, 0.9f, 0.1f);
-    drawFilledTriangle(
-        -0.07f, -0.15f,
-         0.07f, -0.15f,
-         0.00f, -0.40f
-    );
-    {   // 외곽선
-        float v[] = { -0.07f,-0.15f, 0.07f,-0.15f, 0.00f,-0.40f };
-        setColor(rocketProg, 1.0f, 0.7f, 0.0f);
-        drawShape(v, 3, GL_LINE_LOOP);
-    }
+    drawFilledTriangle(sx(-0.07f),sy(-0.15f), sx(0.07f),sy(-0.15f), sx(0.00f),sy(-0.40f));
+    { float v[]={sx(-0.07f),sy(-0.15f), sx(0.07f),sy(-0.15f), sx(0.00f),sy(-0.40f)};
+      setColor(rocketProg, 1.0f, 0.7f, 0.0f); drawShape(v,3,GL_LINE_LOOP); }
 
-    // 6-2. 왼쪽 작은 불꽃 (주황)
+    // 6-2. 왼쪽 작은 불꽃
     setColor(rocketProg, 1.0f, 0.5f, 0.1f);
-    drawFilledTriangle(
-        -0.10f, -0.15f,
-        -0.04f, -0.15f,
-        -0.07f, -0.30f
-    );
+    drawFilledTriangle(sx(-0.10f),sy(-0.15f), sx(-0.04f),sy(-0.15f), sx(-0.07f),sy(-0.30f));
 
-    // 6-3. 오른쪽 작은 불꽃 (주황)
+    // 6-3. 오른쪽 작은 불꽃
     setColor(rocketProg, 1.0f, 0.5f, 0.1f);
-    drawFilledTriangle(
-         0.04f, -0.15f,
-         0.10f, -0.15f,
-         0.07f, -0.30f
-    );
+    drawFilledTriangle(sx(0.04f),sy(-0.15f), sx(0.10f),sy(-0.15f), sx(0.07f),sy(-0.30f));
 
-    // ----------------------------------------------------------
-    // 4. 왼쪽 날개 (주황 삼각형)
-    // ----------------------------------------------------------
+    // 4. 왼쪽 날개
     setColor(rocketProg, 1.0f, 0.6f, 0.2f);
-    drawFilledTriangle(
-        -0.10f,  0.05f,
-        -0.10f, -0.15f,
-        -0.25f, -0.15f
-    );
-    {
-        float v[] = { -0.10f,0.05f, -0.10f,-0.15f, -0.25f,-0.15f };
-        setColor(rocketProg, 1.0f, 0.85f, 0.5f);
-        drawShape(v, 3, GL_LINE_LOOP);
-    }
+    drawFilledTriangle(sx(-0.10f),sy(0.05f), sx(-0.10f),sy(-0.15f), sx(-0.25f),sy(-0.15f));
+    { float v[]={sx(-0.10f),sy(0.05f), sx(-0.10f),sy(-0.15f), sx(-0.25f),sy(-0.15f)};
+      setColor(rocketProg, 1.0f, 0.85f, 0.5f); drawShape(v,3,GL_LINE_LOOP); }
 
-    // ----------------------------------------------------------
-    // 5. 오른쪽 날개 (주황 삼각형, 좌우 대칭)
-    // ----------------------------------------------------------
+    // 5. 오른쪽 날개
     setColor(rocketProg, 1.0f, 0.6f, 0.2f);
-    drawFilledTriangle(
-         0.10f,  0.05f,
-         0.10f, -0.15f,
-         0.25f, -0.15f
-    );
-    {
-        float v[] = { 0.10f,0.05f, 0.10f,-0.15f, 0.25f,-0.15f };
-        setColor(rocketProg, 1.0f, 0.85f, 0.5f);
-        drawShape(v, 3, GL_LINE_LOOP);
-    }
+    drawFilledTriangle(sx(0.10f),sy(0.05f), sx(0.10f),sy(-0.15f), sx(0.25f),sy(-0.15f));
+    { float v[]={sx(0.10f),sy(0.05f), sx(0.10f),sy(-0.15f), sx(0.25f),sy(-0.15f)};
+      setColor(rocketProg, 1.0f, 0.85f, 0.5f); drawShape(v,3,GL_LINE_LOOP); }
 
-    // ----------------------------------------------------------
-    // 2. 몸통 — 세로로 긴 타원
-    //    중심: (0.00, 0.15), 가로 반지름: 0.10, 세로 반지름: 0.30
-    // ----------------------------------------------------------
-    drawEllipse(rocketProg,
-        0.00f, 0.15f,
-        0.10f, 0.30f,
-        48,
-        0.3f, 0.6f, 0.9f,      // 채우기: 파란 계열
-        0.75f, 0.92f, 1.0f     // 외곽선: 밝은 하늘색
-    );
+    // 2. 몸통
+    drawEllipse(rocketProg, sx(0.00f),sy(0.15f), 0.10f*scale,0.30f*scale, 48,
+        0.3f,0.6f,0.9f, 0.75f,0.92f,1.0f);
 
-    // ----------------------------------------------------------
-    // 1. 머리(노즈콘) — 삼각형
-    // ----------------------------------------------------------
+    // 1. 머리
     setColor(rocketProg, 0.4f, 0.7f, 1.0f);
-    drawFilledTriangle(
-        -0.10f, 0.43f,
-         0.10f, 0.43f,
-         0.00f, 0.70f
-    );
-    {
-        float v[] = { -0.10f,0.43f, 0.10f,0.43f, 0.00f,0.70f };
-        setColor(rocketProg, 0.85f, 0.97f, 1.0f);
-        drawShape(v, 3, GL_LINE_LOOP);
-    }
+    drawFilledTriangle(sx(-0.10f),sy(0.43f), sx(0.10f),sy(0.43f), sx(0.00f),sy(0.70f));
+    { float v[]={sx(-0.10f),sy(0.43f), sx(0.10f),sy(0.43f), sx(0.00f),sy(0.70f)};
+      setColor(rocketProg, 0.85f, 0.97f, 1.0f); drawShape(v,3,GL_LINE_LOOP); }
 
-    // ----------------------------------------------------------
-    // 3. 창문 — 채워진 원
-    //    중심: (0.00, 0.22), 반지름: 0.055
-    // ----------------------------------------------------------
-    drawEllipse(rocketProg,
-        0.00f, 0.22f,
-        0.055f, 0.055f,
-        32,
-        0.5f, 0.85f, 1.0f,   // 하늘색 채우기
-        1.0f, 1.0f,  1.0f    // 흰 외곽선
-    );
-    // 창문 하이라이트 (왼쪽 위 작은 흰 원)
-    drawEllipse(rocketProg,
-        -0.015f, 0.237f,
-        0.018f, 0.018f,
-        16,
-        1.0f, 1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f
-    );
+    // 3. 창문
+    drawEllipse(rocketProg, sx(0.00f),sy(0.22f), 0.055f*scale,0.055f*scale, 32,
+        0.5f,0.85f,1.0f, 1.0f,1.0f,1.0f);
+    drawEllipse(rocketProg, sx(-0.015f),sy(0.237f), 0.018f*scale,0.018f*scale, 16,
+        1.0f,1.0f,1.0f, 1.0f,1.0f,1.0f);
 
-    // 그리기 완료 후 원래 셰이더로 복구
     glUseProgram(prevProgram);
 }

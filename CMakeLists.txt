@@ -29,6 +29,9 @@ add_executable(${PROJECT_NAME}
         src/draw_ufo.cpp
         src/draw_constellation_comet.cpp
         src/draw_stars.cpp
+        src/draw_obstacles.cpp
+        src/draw_moon.cpp
+        src/draw_ui.cpp
         ) # PROJECT_NAME의 실행 파일 만듦
 
 include(Dependency.cmake)
