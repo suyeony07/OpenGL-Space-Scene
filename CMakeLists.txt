@@ -39,7 +39,18 @@ target_link_directories(${PROJECT_NAME} PUBLIC ${DEP_LIB_DIR})
 
 # Dependency를 먼저 bulid 될 수 있게 관계 설정
 target_link_libraries(${PROJECT_NAME} PUBLIC ${DEP_LIBS})
-target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
+ if (MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
+endif() 
+이걸로 교체하고 이 문장 바로 아래 
+if(APPLE)
+    target_link_libraries(${PROJECT_NAME} PUBLIC
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework CoreFoundation"
+        "-framework OpenGL"
+    )
+endif()
 
 #환경변수를 macro프로젝트에 추가
 target_compile_definitions(${PROJECT_NAME} PUBLIC
