@@ -20,4 +20,6 @@ void drawUFO();
 // 좌표 범위: x[-0.90 ~ 0.90], y[-0.85 ~ 0.30]
 void drawConstellationAndComet();
 
+void drawStars();
+
 #endif // __DRAW_OBJECTS_H__

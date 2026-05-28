@@ -79,20 +79,19 @@ static void drawLine(float x1, float y1, float x2, float y2) {
 void drawUFO() {
     initShader();
     glUseProgram(s_prog);
-    glEnable(GL_BLEND);                                    // ← 추가
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    // ← 추가
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     const float PI = 3.14159265f;
     const float cx = 0.70f;
-    const float cy = 0.58f;   // 접시 중심
+    const float cy = 0.58f;
 
-    // ── 빛줄기 (그라데이션) ────────────────────────────
+    // ── 빔 (청백색 그라데이션) ─────────────────────────
     float bT = cy - 0.07f;
     float bB = cy - 0.42f;
     float bTw = 0.05f;
     float bBw = 0.13f;
 
-    // 단색 대신 여러 단계로 나눠서 점점 투명하게
     int steps = 10;
     for (int i = 0; i < steps; i++) {
         float t0 = (float)i     / steps;
@@ -101,82 +100,78 @@ void drawUFO() {
         float y1 = bT - t1 * (bT - bB);
         float hw0 = bTw + t0 * (bBw - bTw);
         float hw1 = bTw + t1 * (bBw - bTw);
-        float alpha = 0.45f * (1.0f - t0);  // 위→아래 점점 투명
-        col(0.20f, 0.80f, 0.55f, alpha);
+        float alpha = 0.40f * (1.0f - t0);
+        col(0.55f, 0.85f, 1.00f, alpha);  // 청백색
         draw({
             cx-hw0, y0, 0,  cx+hw0, y0, 0,  cx+hw1, y1, 0,
             cx-hw0, y0, 0,  cx+hw1, y1, 0,  cx-hw1, y1, 0,
         }, GL_TRIANGLES);
     }
-    // 외곽선
-    col(0.10f, 0.40f, 0.28f);
-    drawLine(cx-bTw, bT, cx+bTw, bT);
-    drawLine(cx+bTw, bT, cx+bBw, bB);
-    drawLine(cx+bBw, bB, cx-bBw, bB);
-    drawLine(cx-bBw, bB, cx-bTw, bT);
 
-    // ── 접시 ──────────────────────────────────────────
-    col(0.45f, 0.55f, 0.70f);
+
+    // ── 접시 (은청색 금속) ────────────────────────────
+    col(0.55f, 0.65f, 0.78f);  // 본체
     draw(ellF(cx, cy, 0.20f, 0.06f, 60), GL_TRIANGLE_FAN);
-    col(0.58f, 0.68f, 0.82f);
+    col(0.72f, 0.82f, 0.92f);  // 하이라이트
     draw(ellF(cx, cy+0.015f, 0.17f, 0.038f, 60), GL_TRIANGLE_FAN);
-    col(0.15f, 0.18f, 0.25f);
+    col(0.20f, 0.28f, 0.40f);  // 외곽선
     draw(ellL(cx, cy, 0.20f, 0.06f, 60), GL_LINE_LOOP);
 
     // 노즐 4개
     float nX[4] = {cx-0.11f, cx-0.045f, cx+0.045f, cx+0.11f};
     for (int k = 0; k < 4; k++) {
-        col(0.12f, 0.15f, 0.22f);
+        col(0.18f, 0.22f, 0.32f);
         draw(ellF(nX[k], cy-0.055f, 0.013f, 0.008f, 12), GL_TRIANGLE_FAN);
-        col(0.08f, 0.10f, 0.15f);
+        col(0.10f, 0.15f, 0.25f);
         draw(ellL(nX[k], cy-0.055f, 0.013f, 0.008f, 12), GL_LINE_LOOP);
     }
 
-    // 양옆 불빛
-    col(0.90f, 0.70f, 0.10f);
+    // 양옆 불빛 (차가운 청백)
+    col(0.70f, 0.90f, 1.00f);
     draw(ellF(cx-0.220f, cy, 0.025f, 0.020f, 20), GL_TRIANGLE_FAN);
     draw(ellF(cx+0.220f, cy, 0.025f, 0.020f, 20), GL_TRIANGLE_FAN);
-    col(0.15f, 0.18f, 0.25f);
+    col(0.20f, 0.28f, 0.40f);
     draw(ellL(cx-0.220f, cy, 0.025f, 0.020f, 20), GL_LINE_LOOP);
     draw(ellL(cx+0.220f, cy, 0.025f, 0.020f, 20), GL_LINE_LOOP);
 
-    // ── 돔 ────────────────────────────────────────────
+    // ── 돔 (짙은 강화유리) ───────────────────────────
     float dcy  = cy + 0.115f;
     float domR = 0.115f;
 
-    col(0.25f, 0.38f, 0.52f, 0.85f);
+    col(0.10f, 0.20f, 0.38f, 0.88f);  // 짙은 네이비 반투명
     draw(ellF(cx, dcy, domR, domR, 40), GL_TRIANGLE_FAN);
-    col(0.15f, 0.18f, 0.25f);
+    col(0.40f, 0.60f, 0.85f, 0.40f);  // 하이라이트 반사
+    draw(ellF(cx-0.025f, dcy+0.02f, domR*0.5f, domR*0.35f, 30), GL_TRIANGLE_FAN);
+    col(0.20f, 0.35f, 0.58f);
     draw(ellL(cx, dcy, domR, domR, 40), GL_LINE_LOOP);
 
     // 돔-접시 연결
-    col(0.45f, 0.55f, 0.70f);
+    col(0.55f, 0.65f, 0.78f);
     draw(ellF(cx, cy+0.060f, domR, 0.018f, 40), GL_TRIANGLE_FAN);
-    col(0.15f, 0.18f, 0.25f);
+    col(0.20f, 0.28f, 0.40f);
     draw(ellL(cx, cy, 0.20f, 0.06f, 60), GL_LINE_LOOP);
 
-    // ── 외계인 ────────────────────────────────────────
+    // ── 외계인 (청록 피부) ────────────────────────────
     float hcy = dcy + 0.005f;
     float acy = hcy - 0.070f;
 
     // 몸통
-    col(0.40f, 0.60f, 0.40f);
+    col(0.25f, 0.55f, 0.55f);
     draw(ellF(cx, acy, 0.030f, 0.020f, 20), GL_TRIANGLE_FAN);
-    col(0.20f, 0.35f, 0.20f);
+    col(0.10f, 0.30f, 0.35f);
     draw(ellL(cx, acy, 0.030f, 0.020f, 20), GL_LINE_LOOP);
 
-    // 팔 왼쪽
-    col(0.40f, 0.60f, 0.40f);
+    // 팔
+    col(0.25f, 0.55f, 0.55f);
     drawLine(cx-0.030f, acy, cx-0.075f, acy+0.040f);
     drawLine(cx-0.075f, acy+0.040f, cx-0.055f, acy+0.068f);
     drawLine(cx-0.075f, acy+0.040f, cx-0.040f, acy+0.068f);
-    // 팔 오른쪽
     drawLine(cx+0.030f, acy, cx+0.075f, acy+0.040f);
     drawLine(cx+0.075f, acy+0.040f, cx+0.055f, acy+0.068f);
     drawLine(cx+0.075f, acy+0.040f, cx+0.040f, acy+0.068f);
 
-    // 하트
-    col(0.90f, 0.20f, 0.30f);
+    // 하트 (차가운 분홍→보라)
+    col(0.75f, 0.20f, 0.65f);
     draw(ellF(cx-0.013f, acy+0.075f, 0.013f, 0.013f, 14), GL_TRIANGLE_FAN);
     draw(ellF(cx+0.013f, acy+0.075f, 0.013f, 0.013f, 14), GL_TRIANGLE_FAN);
     draw({
@@ -186,17 +181,17 @@ void drawUFO() {
     }, GL_TRIANGLES);
 
     // 머리
-    col(0.40f, 0.60f, 0.40f);
+    col(0.25f, 0.55f, 0.55f);
     draw(ellF(cx, hcy, 0.045f, 0.052f, 30), GL_TRIANGLE_FAN);
-    col(0.20f, 0.35f, 0.20f);
+    col(0.10f, 0.30f, 0.35f);
     draw(ellL(cx, hcy, 0.045f, 0.052f, 30), GL_LINE_LOOP);
 
     // 눈 흰자
-    col(0.85f, 0.90f, 0.85f);
+    col(0.88f, 0.95f, 1.00f);
     draw(ellF(cx-0.016f, hcy+0.006f, 0.013f, 0.016f, 16), GL_TRIANGLE_FAN);
     draw(ellF(cx+0.016f, hcy+0.006f, 0.013f, 0.016f, 16), GL_TRIANGLE_FAN);
-    // 눈동자
-    col(0.05f, 0.05f, 0.12f);
+    // 눈동자 (짙은 파랑)
+    col(0.02f, 0.05f, 0.20f);
     draw(ellF(cx-0.016f, hcy+0.006f, 0.008f, 0.010f, 14), GL_TRIANGLE_FAN);
     draw(ellF(cx+0.016f, hcy+0.006f, 0.008f, 0.010f, 14), GL_TRIANGLE_FAN);
     // 반짝임
@@ -205,7 +200,7 @@ void drawUFO() {
     draw(ellF(cx+0.013f, hcy+0.010f, 0.003f, 0.003f, 8), GL_TRIANGLE_FAN);
 
     // 입
-    col(0.20f, 0.35f, 0.20f);
+    col(0.10f, 0.30f, 0.35f);
     {
         std::vector<float> mouth;
         for (int i = 0; i <= 10; i++) {
@@ -217,31 +212,23 @@ void drawUFO() {
         draw(mouth, GL_LINE_STRIP);
     }
 
-    // 안테나 (두꺼운 선)
-    col(0.20f, 0.35f, 0.20f);
+    // 안테나
+    col(0.10f, 0.30f, 0.35f);
     for (float d = -0.003f; d <= 0.003f; d += 0.0015f) {
         drawLine(cx-0.013f+d, hcy+0.050f, cx-0.028f+d, hcy+0.078f);
         drawLine(cx+0.013f+d, hcy+0.050f, cx+0.028f+d, hcy+0.078f);
     }
 
-    // 왼쪽 안테나 하트
-    col(0.90f, 0.20f, 0.30f);
+    // 안테나 하트 (보라)
+    col(0.75f, 0.20f, 0.65f);
     draw(ellF(cx-0.034f, hcy+0.085f, 0.007f, 0.007f, 12), GL_TRIANGLE_FAN);
     draw(ellF(cx-0.022f, hcy+0.085f, 0.007f, 0.007f, 12), GL_TRIANGLE_FAN);
-    draw({
-        cx-0.041f, hcy+0.085f, 0,
-        cx-0.015f, hcy+0.085f, 0,
-        cx-0.028f, hcy+0.072f, 0,
-    }, GL_TRIANGLES);
+    draw({ cx-0.041f, hcy+0.085f, 0, cx-0.015f, hcy+0.085f, 0, cx-0.028f, hcy+0.072f, 0 }, GL_TRIANGLES);
 
-    // 오른쪽 안테나 하트
-    col(0.90f, 0.20f, 0.30f);
+    col(0.75f, 0.20f, 0.65f);
     draw(ellF(cx+0.022f, hcy+0.085f, 0.007f, 0.007f, 12), GL_TRIANGLE_FAN);
     draw(ellF(cx+0.034f, hcy+0.085f, 0.007f, 0.007f, 12), GL_TRIANGLE_FAN);
-    draw({
-        cx+0.015f, hcy+0.085f, 0,
-        cx+0.041f, hcy+0.085f, 0,
-        cx+0.028f, hcy+0.072f, 0,
-    }, GL_TRIANGLES);
+    draw({ cx+0.015f, hcy+0.085f, 0, cx+0.041f, hcy+0.085f, 0, cx+0.028f, hcy+0.072f, 0 }, GL_TRIANGLES);
+
     glDisable(GL_BLEND);
 }
