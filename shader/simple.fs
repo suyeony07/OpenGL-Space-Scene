@@ -1,4 +1,5 @@
-// pro_opengl_07 shader/simple.fs
+// shader/simple.fs
+// pro_opengl_06 shader/simple.fs
 
 #version 330 core
 
