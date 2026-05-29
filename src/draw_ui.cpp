@@ -173,3 +173,25 @@ void drawGameUI(int lives, int gameState) {
 
     glDisable(GL_BLEND);
 }
+void drawParticle(float x, float y, float life) {
+    initShader();
+    glUseProgram(s_prog);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // 파편 색상: 주황 → 노랑 → 투명
+    float r = 1.0f;
+    float g = 0.4f + life * 0.5f;
+    float b = 0.1f * life;
+    float a = life * 0.85f;
+    float size = 0.012f * life + 0.003f;
+
+    col(r, g, b, a);
+    drawFillEllipse(x, y, size, size, 10);
+
+    // 중심 밝은 점
+    col(1.0f, 0.95f, 0.7f, a);
+    drawFillEllipse(x, y, size*0.4f, size*0.4f, 8);
+
+    glDisable(GL_BLEND);
+}

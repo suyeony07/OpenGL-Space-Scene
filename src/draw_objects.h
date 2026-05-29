@@ -26,4 +26,5 @@ void drawMoon(float x, float y); //달
 void drawHeart(float x, float y, float size, bool filled);
 void drawGameUI(int lives, int gameState);
 void drawUFO(float offsetX, float offsetY);
+void drawParticle(float x, float y, float life);
 #endif // __DRAW_OBJECTS_H__

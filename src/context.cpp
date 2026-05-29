@@ -43,8 +43,7 @@ bool Context::Init() {
 void Context::ProcessInput(int key, int action) {
     if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
 
-    // 0키로 리셋
-    if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+   if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
         m_rocketX = -0.80f;
         m_rocketY = -0.75f;
         m_ufoX = 0.70f;
@@ -52,6 +51,7 @@ void Context::ProcessInput(int key, int action) {
         m_gameState = 0;
         m_lives = 2;
         m_hitTimer = 0.0f;
+        m_numParticles = 0;  // 파편 초기화
         SPDLOG_INFO("Game reset!");
         return;
     }
@@ -92,13 +92,13 @@ void Context::Render() {
     drawStars();
     drawRingPlanet();
 
-    // UFO 추적 (게임 중일 때만)
+    // UFO 추적
     if (m_gameState == 0) {
         float dx = m_rocketX - m_ufoX;
         float dy = m_rocketY - m_ufoY;
         float dist = sqrtf(dx*dx + dy*dy);
         if (dist > 0.01f) {
-            float ufoSpeed = 0.003f;  // 느리게 추적
+            float ufoSpeed = 0.003f;
             m_ufoX += (dx / dist) * ufoSpeed;
             m_ufoY += (dy / dist) * ufoSpeed;
         }
@@ -115,38 +115,63 @@ void Context::Render() {
         m_hitTimer -= 0.016f;
         visible = ((int)(m_hitTimer * 15.0f) % 2 == 0);
     }
-
     if (m_gameState == 2) {
         visible = ((int)(time * 8.0f) % 2 == 0);
     }
-
     if (m_gameState == 1) {
         m_rocketX = moonX;
         m_rocketY = moonY + 0.12f;
     }
-
     if (visible) {
         drawRocket(m_rocketX, m_rocketY, 0.4f);
     }
 
     drawConstellationAndComet();
+
+    // ── 파편 업데이트 + 그리기 ───────────────────
+    for (int i = 0; i < m_numParticles; ) {
+        auto& p = m_particles[i];
+        p.x += p.vx * 0.016f;
+        p.y += p.vy * 0.016f;
+        p.vy -= 0.5f * 0.016f;  // 중력
+        p.life -= 0.025f;
+
+        if (p.life <= 0.0f) {
+            // 마지막 파편을 현재 위치로 옮기고 개수 감소
+            m_particles[i] = m_particles[m_numParticles - 1];
+            m_numParticles--;
+        } else {
+            drawParticle(p.x, p.y, p.life);
+            i++;
+        }
+    }
+
     drawGameUI(m_lives, m_gameState);
 
     // ── 충돌 판정 ────────────────────────────────
     if (m_gameState == 0 && m_hitTimer <= 0.0f) {
 
-        // UFO 충돌 체크
+        // UFO 충돌
         float udx = m_rocketX - m_ufoX;
         float udy = m_rocketY - m_ufoY;
         float udist = sqrtf(udx*udx + udy*udy);
         if (udist < 0.15f) {
             m_lives--;
+            // 파편 생성 (로켓 위치)
+            for (int i = 0; i < 8 && m_numParticles < 20; i++) {
+                float ang = (float)i / 8 * 6.28f + (time * 3.0f);
+                m_particles[m_numParticles++] = {
+                    m_rocketX, m_rocketY,
+                    cosf(ang) * 0.8f, sinf(ang) * 0.8f,
+                    1.0f
+                };
+            }
             if (m_lives <= 0) {
                 m_gameState = 2;
-                SPDLOG_INFO("GAME OVER! UFO caught you! Press 0 to restart");
+                SPDLOG_INFO("GAME OVER!");
             } else {
                 m_hitTimer = 1.5f;
-                SPDLOG_INFO("UFO HIT! Lives left: {}", m_lives);
+                SPDLOG_INFO("UFO HIT! Lives: {}", m_lives);
             }
         }
 
@@ -171,12 +196,24 @@ void Context::Render() {
             float dist = sqrtf(dx*dx + dy*dy);
             if (dist < a.size + 0.03f) {
                 m_lives--;
+                // 파편 생성 (충돌 지점)
+                float hitX = (m_rocketX + a.x) * 0.5f;
+                float hitY = (m_rocketY + ay) * 0.5f;
+                for (int i = 0; i < 10 && m_numParticles < 20; i++) {
+                    float ang = (float)i / 10 * 6.28f + (time * 5.0f);
+                    float spd = 0.6f + (float)(i % 3) * 0.3f;
+                    m_particles[m_numParticles++] = {
+                        hitX, hitY,
+                        cosf(ang) * spd, sinf(ang) * spd + 0.3f,
+                        1.0f
+                    };
+                }
                 if (m_lives <= 0) {
                     m_gameState = 2;
-                    SPDLOG_INFO("GAME OVER! Press 0 to restart");
+                    SPDLOG_INFO("GAME OVER!");
                 } else {
                     m_hitTimer = 1.5f;
-                    SPDLOG_INFO("HIT! Lives left: {}", m_lives);
+                    SPDLOG_INFO("HIT! Lives: {}", m_lives);
                 }
                 break;
             }
@@ -187,7 +224,7 @@ void Context::Render() {
         float dy = m_rocketY - moonY;
         if (sqrtf(dx*dx + dy*dy) < 0.16f) {
             m_gameState = 1;
-            SPDLOG_INFO("CLEAR! Press 0 to restart");
+            SPDLOG_INFO("CLEAR!");
         }
     }
 }

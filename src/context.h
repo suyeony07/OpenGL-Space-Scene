@@ -31,6 +31,14 @@ private:
     int m_gameState = 0;
     int m_lives = 2;       // 목숨 2개
     float m_hitTimer = 0.0f;  // 피격 시 무적 타이머
+
+    struct Particle {
+        float x, y;
+        float vx, vy;
+        float life;  
+    };
+    Particle m_particles[20];
+    int m_numParticles = 0;
 };
 
 #endif // __CONTEXT_H__
