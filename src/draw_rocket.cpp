@@ -10,6 +10,7 @@
 #include <glad/glad.h>
 #include <cmath>
 #include <vector>
+#include <utility>
 
 // ============================================================
 //  로켓 전용 셰이더 소스 (문자열로 내장)
@@ -175,37 +176,30 @@ void drawRocket(float offsetX, float offsetY, float scale) {
     { float v[]={sx(-0.07f),sy(-0.15f), sx(0.07f),sy(-0.15f), sx(0.00f),sy(-0.40f)};
       setColor(rocketProg, 1.0f, 0.7f, 0.0f); drawShape(v,3,GL_LINE_LOOP); }
 
-    // 6-2. 왼쪽 작은 불꽃
     setColor(rocketProg, 1.0f, 0.5f, 0.1f);
     drawFilledTriangle(sx(-0.10f),sy(-0.15f), sx(-0.04f),sy(-0.15f), sx(-0.07f),sy(-0.30f));
 
-    // 6-3. 오른쪽 작은 불꽃
     setColor(rocketProg, 1.0f, 0.5f, 0.1f);
     drawFilledTriangle(sx(0.04f),sy(-0.15f), sx(0.10f),sy(-0.15f), sx(0.07f),sy(-0.30f));
 
-    // 4. 왼쪽 날개
     setColor(rocketProg, 1.0f, 0.6f, 0.2f);
     drawFilledTriangle(sx(-0.10f),sy(0.05f), sx(-0.10f),sy(-0.15f), sx(-0.25f),sy(-0.15f));
     { float v[]={sx(-0.10f),sy(0.05f), sx(-0.10f),sy(-0.15f), sx(-0.25f),sy(-0.15f)};
       setColor(rocketProg, 1.0f, 0.85f, 0.5f); drawShape(v,3,GL_LINE_LOOP); }
 
-    // 5. 오른쪽 날개
     setColor(rocketProg, 1.0f, 0.6f, 0.2f);
     drawFilledTriangle(sx(0.10f),sy(0.05f), sx(0.10f),sy(-0.15f), sx(0.25f),sy(-0.15f));
     { float v[]={sx(0.10f),sy(0.05f), sx(0.10f),sy(-0.15f), sx(0.25f),sy(-0.15f)};
       setColor(rocketProg, 1.0f, 0.85f, 0.5f); drawShape(v,3,GL_LINE_LOOP); }
 
-    // 2. 몸통
     drawEllipse(rocketProg, sx(0.00f),sy(0.15f), 0.10f*scale,0.30f*scale, 48,
         0.3f,0.6f,0.9f, 0.75f,0.92f,1.0f);
 
-    // 1. 머리
     setColor(rocketProg, 0.4f, 0.7f, 1.0f);
     drawFilledTriangle(sx(-0.10f),sy(0.43f), sx(0.10f),sy(0.43f), sx(0.00f),sy(0.70f));
     { float v[]={sx(-0.10f),sy(0.43f), sx(0.10f),sy(0.43f), sx(0.00f),sy(0.70f)};
       setColor(rocketProg, 0.85f, 0.97f, 1.0f); drawShape(v,3,GL_LINE_LOOP); }
 
-    // 3. 창문
     drawEllipse(rocketProg, sx(0.00f),sy(0.22f), 0.055f*scale,0.055f*scale, 32,
         0.5f,0.85f,1.0f, 1.0f,1.0f,1.0f);
     drawEllipse(rocketProg, sx(-0.015f),sy(0.237f), 0.018f*scale,0.018f*scale, 16,

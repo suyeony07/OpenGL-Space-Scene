@@ -98,7 +98,7 @@ static void drawRect(float x0, float y0, float x1, float y1) {
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glDeleteBuffers(1, &vbo); glDeleteVertexArrays(1, &vao);
 }
-void drawMoon(float x, float y) {
+void drawMoon(float x, float y, float time) {
     initShader();
     glUseProgram(s_prog);
     glEnable(GL_BLEND);
@@ -173,7 +173,7 @@ void drawMoon(float x, float y) {
     drawLine(x, y, r, r, 48);
 
     // ── 깃대 ─────────────────────────────────────
-    float poleX = x;
+        float poleX = x;
     float poleBot = y + r * 0.6f;
     float poleTop = y + r * 1.8f;
 
@@ -182,41 +182,91 @@ void drawMoon(float x, float y) {
     col(0.92f, 0.92f, 0.92f);
     drawRect(poleX - 0.002f, poleBot, poleX + 0.003f, poleTop);
 
-    // 깃대 꼭대기 동그라미
     col(0.85f, 0.85f, 0.85f);
     drawFill(poleX, poleTop + 0.005f, 0.005f, 0.005f, 10);
 
-    // ── 깃발 ─────────────────────────────────────
+    // ── 깃발 (펄럭임 적용) ──────────────────────
     float flagL = poleX + 0.003f;
-    float flagR = poleX + 0.08f;
+    float flagW = 0.077f;
+    float flagH = 0.045f;
     float flagTop = poleTop;
-    float flagBot = poleTop - 0.045f;
+    float flagBot = poleTop - flagH;
 
-    // 깃발 그림자
-    col(0.65f, 0.08f, 0.08f, 0.30f);
-    drawRect(flagL + 0.002f, flagBot - 0.002f, flagR + 0.002f, flagTop - 0.002f);
+    // 펄럭임: 끝으로 갈수록 더 흔들림
+    float wave1 = sinf(time * 4.0f) * 0.008f;
+    float wave2 = sinf(time * 4.0f + 1.5f) * 0.012f;
+
+    // 깃발을 4개 사다리꼴로 나눠서 펄럭이는 곡선 만들기
+    // 각 세로 분할의 x 오프셋 (끝으로 갈수록 커짐)
+    float seg0x = 0.0f;
+    float seg1x = sinf(time * 4.0f + 0.5f) * 0.004f;
+    float seg2x = sinf(time * 4.0f + 1.0f) * 0.008f;
+    float seg3x = wave1;
+    float seg4x = wave2;
+
+    // 4개의 사다리꼴로 깃발 그리기
+    auto drawFlagSeg = [&](float t0, float t1, float ox0, float ox1) {
+        float x0 = flagL + flagW * t0;
+        float x1 = flagL + flagW * t1;
+        float v[] = {
+            x0 + ox0, flagBot, 0,
+            x1 + ox1, flagBot, 0,
+            x1 + ox1, flagTop, 0,
+            x0 + ox0, flagBot, 0,
+            x1 + ox1, flagTop, 0,
+            x0 + ox0, flagTop, 0,
+        };
+        GLuint vao, vbo;
+        glGenVertexArrays(1, &vao); glGenBuffers(1, &vbo);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), nullptr);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDeleteBuffers(1, &vbo); glDeleteVertexArrays(1, &vao);
+    };
 
     // 깃발 본체
     col(0.95f, 0.15f, 0.12f);
-    drawRect(flagL, flagBot, flagR, flagTop);
+    drawFlagSeg(0.00f, 0.25f, seg0x, seg1x);
+    drawFlagSeg(0.25f, 0.50f, seg1x, seg2x);
+    drawFlagSeg(0.50f, 0.75f, seg2x, seg3x);
+    drawFlagSeg(0.75f, 1.00f, seg3x, seg4x);
 
-    // 깃발 하이라이트 (위쪽 밝게)
-    col(1.0f, 0.35f, 0.30f, 0.40f);
-    drawRect(flagL, flagTop - 0.012f, flagR, flagTop);
-
-    // 깃발 어두운 부분 (아래)
+    // 그림자 (아래쪽)
     col(0.72f, 0.08f, 0.06f, 0.45f);
-    drawRect(flagL, flagBot, flagR, flagBot + 0.012f);
+    {
+        float h = 0.012f;
+        // 아래쪽 띠 (펄럭임 적용)
+        float v[] = {
+            flagL + seg0x, flagBot, 0,
+            flagL + flagW*0.25f + seg1x, flagBot, 0,
+            flagL + flagW*0.25f + seg1x, flagBot + h, 0,
+            flagL + seg0x, flagBot, 0,
+            flagL + flagW*0.25f + seg1x, flagBot + h, 0,
+            flagL + seg0x, flagBot + h, 0,
+        };
+        GLuint vao, vbo;
+        glGenVertexArrays(1, &vao); glGenBuffers(1, &vbo);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), nullptr);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDeleteBuffers(1, &vbo); glDeleteVertexArrays(1, &vao);
+    }
 
-    // 별 (다윗의 별 모양)
+    // 별 (펄럭임 따라 살짝 이동)
     col(1.0f, 1.0f, 1.0f);
-    float starCx = flagL + 0.04f;
+    float starCx = flagL + flagW * 0.5f + seg2x;
     float starCy = flagTop - 0.022f;
     float ss = 0.010f;
     drawTriangle(starCx, starCy + ss, starCx - ss, starCy - ss*0.4f, starCx + ss, starCy - ss*0.4f);
     drawTriangle(starCx, starCy - ss*0.8f, starCx - ss, starCy + ss*0.2f, starCx + ss, starCy + ss*0.2f);
 
-    // 깃대 바닥 고정 장치
+    // 깃대 바닥
     col(0.65f, 0.60f, 0.45f);
     drawFill(poleX, poleBot, 0.014f, 0.009f, 12);
     col(0.55f, 0.50f, 0.38f);

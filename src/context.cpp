@@ -108,7 +108,7 @@ void Context::Render() {
     drawObstacles(time);
 
     float moonX = 0.70f, moonY = -0.65f;
-    drawMoon(moonX, moonY);
+    drawMoon(moonX, moonY, time);
 
     bool visible = true;
     if (m_hitTimer > 0.0f) {
